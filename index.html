@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prénom du jour</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: #f4f4f4;
+    }
+    h1 {
+      font-size: 2.5em;
+      color: #333;
+    }
+    .prenom {
+      font-size: 3em;
+      color: #0077cc;
+      margin-top: 20px;
+    }
+    .date-picker {
+      margin-top: 30px;
+    }
+    input[type="date"] {
+      padding: 10px;
+      font-size: 1em;
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Le prénom du jour est :</h1>
+  <div class="prenom" id="prenom"></div>
+
+  <div class="date-picker">
+    <input type="date" id="dateInput" min="2000-01-01" max="2025-12-31">
+  </div>
+
+  <footer>
+    &copy; 2025 - Prénom du jour
+  </footer>
+
+  <script>
+    let data = {};
+
+    async function loadPrenoms() {
+      const res = await fetch("prenoms.json");
+      data = await res.json();
+      const today = new Date().toISOString().split("T")[0];
+      showPrenom(today);
+    }
+
+    function showPrenom(dateStr) {
+      const prenom = data[dateStr];
+      document.getElementById("prenom").textContent = prenom || "Aucun prénom trouvé";
+    }
+
+    document.getElementById("dateInput").addEventListener("change", (e) => {
+      showPrenom(e.target.value);
+    });
+
+    loadPrenoms();
+  </script>
+</body>
+</html>
