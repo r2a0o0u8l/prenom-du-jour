@@ -1,77 +1,122 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prénom du jour</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f2f2f2;
-        }
-        h1 {
-            font-weight: bold;
-            font-size: 48px;
-        }
-        table {
-            margin: 20px auto;
-        }
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-            margin: 5px;
-        }
-        footer {
-            margin-top: 40px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prénom du jour</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    h1 {
+      font-size: 48px;
+      font-weight: bold;
+      color: #333;
+    }
+    #prenom {
+      font-size: 40px;
+      color: #673ab7;
+      margin: 20px 0;
+    }
+    table {
+      margin: 30px auto;
+      border-collapse: collapse;
+    }
+    td {
+      padding: 10px;
+    }
+    input[type="number"] {
+      padding: 6px;
+      width: 80px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    form {
+      margin-top: 40px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Le prénom du jour est : <span id="prenom"></span></h1>
+  <h1>Le prénom du jour est :</h1>
+  <div id="prenom">Chargement...</div>
 
-    <div>
-        <table>
-            <tr>
-                <td><input type="number" id="jour" placeholder="Jour" min="1" max="31"></td>
-                <td><input type="number" id="mois" placeholder="Mois" min="1" max="12"></td>
-                <td><input type="number" id="annee" placeholder="Année" min="2000" max="2025"></td>
-                <td><button onclick="chercherPrenom()">Chercher</button></td>
-            </tr>
-        </table>
-        <p id="resultat"></p>
-    </div>
+  <!-- Formulaire d'inscription -->
+  <form action="https://docs.google.com/forms/d/e/1FAIpQLScJtaKflYsv1IkzxDDg_wmq5HN_kIIC3LJnhVFclMPBuxp17A/formResponse" target="_blank">
+    <label for="email">Inscrivez-vous pour recevoir le prénom du jour :</label><br/>
+    <input type="email" name="entry.1234567890" placeholder="Votre e-mail" required>
+    <button type="submit">S'inscrire</button>
+  </form>
 
-    <footer>
-        <p><a href="https://docs.google.com/forms/d/e/1FAIpQLScJtaKflYsv1IkzxDDg_wmq5HN_kIIC3LJnhVFclMPBuxp17A/viewform?usp=sf_link" target="_blank">S'inscrire par e-mail</a></p>
-    </footer>
+  <!-- Tableau de recherche de prénom -->
+  <h2>Rechercher un prénom par date</h2>
+  <table>
+    <tr>
+      <td>Jour :</td>
+      <td><input type="number" id="jour" min="1" max="31"></td>
+    </tr>
+    <tr>
+      <td>Mois :</td>
+      <td><input type="number" id="mois" min="1" max="12"></td>
+    </tr>
+    <tr>
+      <td>Année :</td>
+      <td><input type="number" id="annee" min="2000" max="2025"></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <button onclick="rechercherPrenom()">Afficher le prénom</button>
+      </td>
+    </tr>
+  </table>
+  <div id="resultatRecherche" style="font-size: 24px; font-weight: bold; color: #333;"></div>
 
-    <script>
-        // Chargement des prénoms
-        let prenoms = {};
-        fetch('prenoms.json')
-            .then(response => response.json())
-            .then(data => {
-                prenoms = data;
-                afficherPrenomDuJour();
-            });
+  <script>
+    let prenoms = {};
 
-        function afficherPrenomDuJour() {
-            const aujourdHui = new Date();
-            const cle = `${aujourdHui.getDate().toString().padStart(2, '0')}-${(aujourdHui.getMonth()+1).toString().padStart(2, '0')}-${aujourdHui.getFullYear()}`;
-            document.getElementById('prenom').textContent = prenoms[cle] || "Aucun prénom trouvé";
-        }
+    async function chargerPrenoms() {
+      const response = await fetch('prenoms.json');
+      prenoms = await response.json();
+      afficherPrenomDuJour();
+    }
 
-        function chercherPrenom() {
-            const jour = document.getElementById('jour').value.padStart(2, '0');
-            const mois = document.getElementById('mois').value.padStart(2, '0');
-            const annee = document.getElementById('annee').value;
-            const cle = `${jour}-${mois}-${annee}`;
-            const resultat = prenoms[cle] || "Aucun prénom trouvé pour cette date.";
-            document.getElementById('resultat').textContent = resultat;
-        }
-    </script>
+    function formaterDate(j, m, a) {
+      return `${a}-${String(m).padStart(2, '0')}-${String(j).padStart(2, '0')}`;
+    }
+
+    function afficherPrenomDuJour() {
+      const aujourdHui = new Date();
+      const dateCle = formaterDate(aujourdHui.getDate(), aujourdHui.getMonth() + 1, aujourdHui.getFullYear());
+      const prenom = prenoms[dateCle] || "Non disponible";
+      document.getElementById("prenom").innerText = prenom;
+    }
+
+    function rechercherPrenom() {
+      const j = parseInt(document.getElementById("jour").value);
+      const m = parseInt(document.getElementById("mois").value);
+      const a = parseInt(document.getElementById("annee").value);
+
+      if (isNaN(j) || isNaN(m) || isNaN(a)) {
+        alert("Veuillez entrer une date valide.");
+        return;
+      }
+
+      const cle = formaterDate(j, m, a);
+      const prenom = prenoms[cle] || "Aucun prénom trouvé pour cette date.";
+      document.getElementById("resultatRecherche").innerText = prenom;
+    }
+
+    chargerPrenoms();
+  </script>
 </body>
 </html>
-mise a jour 
+
